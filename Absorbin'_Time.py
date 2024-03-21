@@ -4,8 +4,9 @@ from pygame_functions import *
 import math
 import random
 #Setup
-
-screenSize(1000,800)
+width=1000
+height=800
+screenSize(width,height)
 setBackgroundColour("blue")
 
 #Globals
@@ -20,6 +21,10 @@ class Creature:
     def __init__(self,x,y,size,image):
         self.x=x
         self.y=y
+        if self.x>=width:
+            self.x=10
+        if self.x<=0:
+            self.x=990
         self.sprite=makeSprite(image)
         self.direction=0
         self.size=size
@@ -46,20 +51,23 @@ class Creature:
             speedScalar==1.25
         if abs(dX)>5 or abs(dY)>5:
             if wP:
-                xspeed = self.speed * math.cos(self.direction)*speedScalar
-                yspeed = self.speed * math.sin(self.direction)*speedScalar
-            elif sP:
-                xspeed = -self.speed * math.cos(self.direction)*speedScalar
-                yspeed = -self.speed * math.sin(self.direction)*speedScalar
-            elif aP:
-                xspeed = -1.05*self.speed * math.cos(self.direction+math.pi/2)
-                yspeed = -1.05*self.speed * math.sin(self.direction+math.pi/2)
-            elif dP:
-                xspeed = 1.05*self.speed * math.cos(self.direction+math.pi/2)
-                yspeed = 1.05*self.speed * math.sin(self.direction+math.pi/2)
+                xspeed = (xspeed*0.75)+self.speed * math.cos(self.direction)*speedScalar
+                yspeed = (yspeed*0.75)+self.speed * math.sin(self.direction)*speedScalar
+            #elif sP:
+                #xspeed = -self.speed * math.cos(self.direction)*speedScalar
+                #yspeed = -self.speed * math.sin(self.direction)*speedScalar
+            if aP:
+                xspeed = (xspeed*0.75)-1.05*self.speed * math.cos(self.direction+math.pi/2)
+                yspeed = (yspeed*0.75)-1.05*self.speed * math.sin(self.direction+math.pi/2)
+            if dP:
+                xspeed = (xspeed*0.75)+1.05*self.speed * math.cos(self.direction+math.pi/2)
+                yspeed = (yspeed*0.75)+1.05*self.speed * math.sin(self.direction+math.pi/2)
         self.x += xspeed
         self.y += yspeed
         moveSprite(self.sprite, self.x, self.y, centre=True)
+        
+        def colDet(self):
+            pass
 
 class Enemy(Creature):
     def move(self):
