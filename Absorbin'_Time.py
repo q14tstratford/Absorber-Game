@@ -8,12 +8,26 @@ width=1000
 height=800
 screenSize(width,height)
 setBackgroundColour("blue")
-
+setAutoUpdate(False)
 #Globals
 
 #Constants
 
 #Subprograms
+def colDetect():
+    global allCreatures
+    for creature1 in allCreatures:
+        for creature2 in allCreatures:
+            if creature1==creature2:
+                break
+            elif touching(creature1.sprite,creature2.sprite):
+                if creature1.size > creature2.size :
+                    print("{} eats {}".format(creature1,creature2))
+                elif creature1.size <= creature2.size :
+                    print("{} eats {}".format(creature2,creature1))
+
+def findNearest():
+    pass
 
 #Classes
 
@@ -65,9 +79,7 @@ class Creature:
         self.x += xspeed
         self.y += yspeed
         moveSprite(self.sprite, self.x, self.y, centre=True)
-        
-        def colDet(self):
-            pass
+
 
 class Enemy(Creature):
     def move(self):
@@ -76,7 +88,12 @@ class Enemy(Creature):
         dY=Player.y-self.y
         xspeed=0
         yspeed=0
-        if ((dX**2+dY**2)**0.5)<350 and self.size>Player.size:
+        if((dX**2+dY**2)**0.5)<10:
+            self.direction=math.atan2(dY,dX)
+            transformSprite(self.sprite,self.direction/math.pi*180+90,self.size)
+            xspeed=0
+            yspeed=0
+        elif ((dX**2+dY**2)**0.5)<350 and self.size>Player.size:
             self.direction=math.atan2(dY,dX)
             transformSprite(self.sprite,self.direction/math.pi*180+90,self.size)
             xspeed = self.speed * math.cos(self.direction)
@@ -86,6 +103,7 @@ class Enemy(Creature):
             transformSprite(self.sprite,self.direction/math.pi*180+90,self.size)
             xspeed = self.speed * math.cos(self.direction)
             yspeed = self.speed * math.sin(self.direction)
+        
         self.x += xspeed
         self.y += yspeed
         moveSprite(self.sprite, self.x, self.y, centre=True)
@@ -96,11 +114,14 @@ Player=Creature(150,150,0.5,"Kevin.png")
 enemies=[]
 for i in range(5):
     enemies.append(Enemy(random.randint(0,1000),random.randint(0,800),random.randint(0,10)/10,"Bob.png"))
-#e1=Creature(200,200,0.5,"Bob.png",0)
+allCreatures=enemies
+allCreatures.append(Player)
 #Main Body
 while True:
     Player.move()
     tick(30)
     for e in enemies:
         e.move()
+    updateDisplay()
+    colDetect()
 endWait()
