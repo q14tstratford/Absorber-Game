@@ -23,11 +23,14 @@ def colDetect():
             elif touching(creature1.sprite,creature2.sprite):
                 if creature1.size > creature2.size :
                     print("{} eats {}".format(creature1,creature2))
+                    allCreatures.remove(creature2)
+                    creature1.size+=creature2.Die()
+                    
                 elif creature1.size <= creature2.size :
                     print("{} eats {}".format(creature2,creature1))
+                    allCreatures.remove(creature1)
+                    creature2.size+=creature1.Die()
 
-def findNearest():
-    pass
 
 #Classes
 
@@ -79,8 +82,11 @@ class Creature:
         self.x += xspeed
         self.y += yspeed
         moveSprite(self.sprite, self.x, self.y, centre=True)
-
-
+    
+    def Die(self):
+        hideSprite(self.sprite)
+        return self.size
+    
 class Enemy(Creature):
     def move(self):
         global Player
@@ -107,6 +113,8 @@ class Enemy(Creature):
         self.x += xspeed
         self.y += yspeed
         moveSprite(self.sprite, self.x, self.y, centre=True)
+        
+        
 #Creatures
 
 Player=Creature(150,150,0.5,"Kevin.png")
