@@ -31,24 +31,20 @@ def colDetect():
                     allCreatures.remove(creature1)
                     creature2.size+=creature1.Die()
 
-
 #Classes
 
 class Creature:
     def __init__(self,x,y,size,image):
         self.x=x
         self.y=y
-        if self.x>=width:
-            self.x=10
-        if self.x<=0:
-            self.x=990
         self.sprite=makeSprite(image)
         self.direction=0
         self.size=size
         self.speed = 10
-        moveSprite(self.sprite,self.x,self.y, centre=True)
+        self.trailPos=[]
+        moveSprite(self.sprite,500,400, centre=True)
         showSprite(self.sprite)
-        transformSprite(self.sprite,self.direction,self.size)
+        transformSprite(self.sprite,self.direction,(self.size**0.5)/50)
         
     def move(self):
         mX=mouseX()
@@ -57,13 +53,16 @@ class Creature:
         aP=keyPressed("A")
         sP=keyPressed("S")
         dP=keyPressed("D")
-        dX=mX-self.x
-        dY=mY-self.y
+        dX=mX-500
+        dY=mY-400
         self.direction=math.atan2(dY,dX)
-        transformSprite(self.sprite,self.direction/math.pi*180+90,self.size)
+        transformSprite(self.sprite,self.direction/math.pi*180+90,(self.size**0.5)/50)
         xspeed = 0
         yspeed = 0
         speedScalar=((dX**2+dY**2)**0.5)/100
+        self.trailPos.append([int(self.x),int(self.y)])
+        if len(self.trailPos) > 20:
+            self.trailPos.pop(0)
         if speedScalar>1.25:
             speedScalar==1.25
         if abs(dX)>5 or abs(dY)>5:
@@ -81,13 +80,24 @@ class Creature:
                 yspeed = (yspeed*0.75)+1.05*self.speed * math.sin(self.direction+math.pi/2)
         self.x += xspeed
         self.y += yspeed
-        moveSprite(self.sprite, self.x, self.y, centre=True)
+        for tElement in self.trailPos:
+            drawEllipse(500+tElement[0]-self.x,400+tElement[1]-self.y,(self.size**0.5),(self.size**0.5),"green")
     
     def Die(self):
         hideSprite(self.sprite)
         return self.size
     
 class Enemy(Creature):
+    def __init__(self,x,y,size,image):
+        self.x=x
+        self.y=y
+        self.sprite=makeSprite(image)
+        self.direction=0
+        self.size=size
+        self.speed = 10
+        showSprite(self.sprite)
+        transformSprite(self.sprite,self.direction,(self.size**0.5)/50)
+        
     def move(self):
         global Player
         dX=Player.x-self.x
@@ -96,40 +106,44 @@ class Enemy(Creature):
         yspeed=0
         if((dX**2+dY**2)**0.5)<10:
             self.direction=math.atan2(dY,dX)
-            transformSprite(self.sprite,self.direction/math.pi*180+90,self.size)
             xspeed=0
             yspeed=0
         elif ((dX**2+dY**2)**0.5)<350 and self.size>Player.size:
             self.direction=math.atan2(dY,dX)
-            transformSprite(self.sprite,self.direction/math.pi*180+90,self.size)
             xspeed = self.speed * math.cos(self.direction)
             yspeed = self.speed * math.sin(self.direction)
         elif ((dX**2+dY**2)**0.5)<350 and self.size<=Player.size:
             self.direction=math.atan2(-dY,-dX)
-            transformSprite(self.sprite,self.direction/math.pi*180+90,self.size)
             xspeed = self.speed * math.cos(self.direction)
             yspeed = self.speed * math.sin(self.direction)
         
-        self.x += xspeed
-        self.y += yspeed
-        moveSprite(self.sprite, self.x, self.y, centre=True)
+        self.x = (self.x + xspeed)%10000
+        self.y = (self.y + yspeed)%10000
+        if (dX**2+dY**2)**0.5 <750:
+            transformSprite(self.sprite,self.direction/math.pi*180+90,(self.size**0.5)/50)
+        moveSprite(self.sprite, 500+(self.x-Player.x),400+(self.y-Player.y), centre=True)
         
         
 #Creatures
 
-Player=Creature(150,150,0.5,"Kevin.png")
+Player=Creature(5000,5000,200,"Kevin.png")
 
 enemies=[]
-for i in range(5):
-    enemies.append(Enemy(random.randint(0,1000),random.randint(0,800),random.randint(0,10)/10,"Bob.png"))
+for i in range(200):
+    enemies.append(Enemy(random.randint(0,10000),random.randint(0,10000),random.randint(0,10000)/10,"Bob.png"))
 allCreatures=enemies
 allCreatures.append(Player)
 #Main Body
 while True:
+    clearShapes()
     Player.move()
     tick(30)
     for e in enemies:
         e.move()
     updateDisplay()
-    colDetect()
+    try:
+        colDetect()
+    finally:
+        pass
+
 endWait()
